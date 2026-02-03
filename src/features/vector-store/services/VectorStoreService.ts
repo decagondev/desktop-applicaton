@@ -198,6 +198,7 @@ export class VectorStoreService implements IVectorStore {
       note: 0,
       voice: 0,
       image: 0,
+      video: 0,
     };
 
     for (const entry of this.entries.values()) {

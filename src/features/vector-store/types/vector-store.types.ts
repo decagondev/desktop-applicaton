@@ -16,7 +16,8 @@ export type VectorSourceType =
   | 'github-diff'
   | 'note'
   | 'voice'
-  | 'image';
+  | 'image'
+  | 'video';
 
 /**
  * Metadata associated with a vector entry
@@ -64,6 +65,12 @@ export interface IVectorMetadata {
   duration?: number;
   /** For voice: audio format */
   format?: string;
+  /** For videos: platform (youtube, vimeo, loom, etc.) */
+  platform?: string;
+  /** For videos: video ID on the platform */
+  videoId?: string;
+  /** For videos: author/channel name */
+  author?: string;
 }
 
 /**

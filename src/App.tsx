@@ -8,12 +8,13 @@ import { RepoCloneForm, RepoList, useGitHub } from '@features/github';
 import { ImageUploader, ImageGallery, useImages } from '@features/images';
 import { VoiceRecorder, VoiceNotesList, useVoiceRecorder, useVoiceNotes } from '@features/voice';
 import { NoteEditor, NotesList, useNotes } from '@features/notes';
+import { VideoUrlInput, VideoList, useVideos } from '@features/video';
 import { useState } from 'react';
 
 /**
  * Navigation tabs
  */
-type NavTab = 'chat' | 'documents' | 'web' | 'github' | 'images' | 'voice' | 'notes' | 'dashboard' | 'settings';
+type NavTab = 'chat' | 'documents' | 'web' | 'github' | 'video' | 'images' | 'voice' | 'notes' | 'dashboard' | 'settings';
 
 /**
  * Navigation button component
@@ -292,6 +293,42 @@ function NotesPage(): React.ReactElement {
 }
 
 /**
+ * Video Transcripts page component
+ */
+function VideoPage(): React.ReactElement {
+  const videos = useVideos();
+
+  return (
+    <div className="h-full overflow-auto p-6 bg-slate-900">
+      <h1 className="text-2xl font-bold text-slate-200 mb-6">Video Transcripts</h1>
+      <p className="text-slate-400 mb-6">
+        Add videos from YouTube, Vimeo, Loom, and more to extract transcripts for your knowledge base.
+      </p>
+      
+      <div className="max-w-3xl space-y-6">
+        <VideoUrlInput
+          onSubmit={videos.processVideo}
+          isProcessing={videos.isProcessing}
+          progress={videos.progress}
+        />
+
+        {videos.error && (
+          <div className="p-3 bg-red-900/30 border border-red-900 rounded-lg text-red-400">
+            {videos.error}
+          </div>
+        )}
+
+        <VideoList
+          videos={videos.videos}
+          onVectorize={videos.vectorizeVideo}
+          onDelete={videos.deleteVideo}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
  * Main content component
  * Renders content based on active tab and feature flags
  */
@@ -339,6 +376,13 @@ function MainContent(): React.ReactElement {
         <NavButton active={activeTab === 'github'} onClick={() => setActiveTab('github')} title="GitHub">
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </NavButton>
+
+        {/* Video Transcripts */}
+        <NavButton active={activeTab === 'video'} onClick={() => setActiveTab('video')} title="Video Transcripts">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
         </NavButton>
 
@@ -398,6 +442,7 @@ function MainContent(): React.ReactElement {
         {activeTab === 'documents' && <DocumentsPage />}
         {activeTab === 'web' && <WebSearchPage />}
         {activeTab === 'github' && <GitHubPage />}
+        {activeTab === 'video' && <VideoPage />}
         {activeTab === 'images' && <ImagesPage />}
         {activeTab === 'voice' && <VoiceNotesPage />}
         {activeTab === 'notes' && <NotesPage />}
