@@ -5,6 +5,7 @@
 
 import { registerVectorStoreHandlers } from './vector-store.js';
 import { registerSettingsHandlers } from './settings.js';
+import { registerChatHandlers } from './chat.js';
 
 /**
  * Register all IPC handlers for the application
@@ -15,6 +16,7 @@ export function registerAllHandlers(): void {
   
   registerVectorStoreHandlers();
   registerSettingsHandlers();
+  registerChatHandlers();
   
   console.log('IPC handlers registered successfully');
 }
@@ -68,3 +70,4 @@ export async function cleanupAllModules(): Promise<void> {
 
 export { registerVectorStoreHandlers } from './vector-store.js';
 export { registerSettingsHandlers } from './settings.js';
+export { registerChatHandlers } from './chat.js';

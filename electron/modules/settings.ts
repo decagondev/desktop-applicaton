@@ -9,9 +9,14 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 /**
+ * AI Provider type
+ */
+type AIProvider = 'groq' | 'openai' | 'anthropic' | 'ollama' | 'together' | 'openrouter' | 'mistral' | 'moonshot' | 'perplexity' | 'deepseek';
+
+/**
  * API key names
  */
-type ApiKeyName = 'groq' | 'openai' | 'anthropic' | 'tavily' | 'github';
+type ApiKeyName = 'groq' | 'openai' | 'anthropic' | 'together' | 'openrouter' | 'mistral' | 'moonshot' | 'perplexity' | 'deepseek' | 'tavily' | 'github';
 
 /**
  * Feature flags
@@ -25,6 +30,14 @@ interface IFeatureFlags {
 }
 
 /**
+ * Ollama configuration
+ */
+interface IOllamaConfig {
+  baseUrl: string;
+  enabled: boolean;
+}
+
+/**
  * User preferences
  */
 interface IUserPreferences {
@@ -32,6 +45,8 @@ interface IUserPreferences {
   embeddingModel: 'groq' | 'openai' | 'local';
   maxHistoryLength: number;
   autoSyncInterval: number;
+  aiProvider: AIProvider;
+  aiModel: string;
 }
 
 /**
@@ -40,6 +55,7 @@ interface IUserPreferences {
 interface ISettingsStorage {
   features: IFeatureFlags;
   preferences: IUserPreferences;
+  ollama?: IOllamaConfig;
 }
 
 /**
@@ -58,6 +74,12 @@ const DEFAULT_SETTINGS: ISettingsStorage = {
     embeddingModel: 'openai',
     maxHistoryLength: 100,
     autoSyncInterval: 300000,
+    aiProvider: 'groq',
+    aiModel: 'llama-3.3-70b-versatile',
+  },
+  ollama: {
+    baseUrl: 'http://localhost:11434',
+    enabled: false,
   },
 };
 
@@ -98,12 +120,20 @@ function loadSettings(): ISettingsStorage {
       return {
         features: { ...DEFAULT_SETTINGS.features, ...parsed.features },
         preferences: { ...DEFAULT_SETTINGS.preferences, ...parsed.preferences },
+        ollama: { ...DEFAULT_SETTINGS.ollama, ...parsed.ollama },
       };
     }
   } catch (error) {
     console.error('Error loading settings:', error);
   }
   return DEFAULT_SETTINGS;
+}
+
+/**
+ * Get settings (alias for loadSettings, for external module use)
+ */
+function getSettings(): ISettingsStorage {
+  return loadSettings();
 }
 
 /**
@@ -278,4 +308,4 @@ export function registerSettingsHandlers(): void {
 /**
  * Export for use by other modules
  */
-export { getApiKey, hasApiKey, loadSettings };
+export { getApiKey, hasApiKey, loadSettings, getSettings };

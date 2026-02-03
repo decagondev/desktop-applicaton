@@ -134,3 +134,16 @@ const settingsAPI = {
 
 contextBridge.exposeInMainWorld('settingsAPI', settingsAPI)
 
+/**
+ * Chat API
+ * Exposes AI chat operations to the renderer
+ */
+const chatAPI = {
+  queryWithRag: (query: string, history: unknown[], options?: unknown) =>
+    ipcRenderer.invoke('chat-query-with-rag', query, history, options),
+  chatCompletion: (messages: unknown[], options?: unknown) =>
+    ipcRenderer.invoke('chat-completion', messages, options),
+}
+
+contextBridge.exposeInMainWorld('chatAPI', chatAPI)
+
