@@ -3,8 +3,8 @@
  * Centralized registration for all IPC handlers
  */
 
-import { registerVectorStoreHandlers } from './vector-store';
-import { registerSettingsHandlers } from './settings';
+import { registerVectorStoreHandlers } from './vector-store.js';
+import { registerSettingsHandlers } from './settings.js';
 
 /**
  * Register all IPC handlers for the application
@@ -66,5 +66,5 @@ export async function cleanupAllModules(): Promise<void> {
   }
 }
 
-export { registerVectorStoreHandlers } from './vector-store';
-export { registerSettingsHandlers } from './settings';
+export { registerVectorStoreHandlers } from './vector-store.js';
+export { registerSettingsHandlers } from './settings.js';

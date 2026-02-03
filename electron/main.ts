@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { existsSync } from 'fs'
 import si from 'systeminformation'
+import { registerAllHandlers } from './modules/index.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -17,7 +18,7 @@ const __dirname = dirname(__filename)
 /**
  * Environment configuration
  */
-const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
+const isDev = process.env.NODE_ENV !== 'production' && !app.isPackaged
 const WEB_PORT = process.env.VITE_PORT || 5173
 
 /**
@@ -73,10 +74,11 @@ function createWindow(): void {
     let indexPath: string
     if (app.isPackaged) {
       // In packaged app, dist is in the app directory
-      indexPath = join(__dirname, '../dist/index.html')
+      indexPath = join(__dirname, '../../dist/index.html')
     } else {
       // In development build (not packaged), use relative path
-      indexPath = join(__dirname, '../dist/index.html')
+      // electron-dist/electron/main.js -> ../../dist/index.html
+      indexPath = join(__dirname, '../../dist/index.html')
     }
     
     if (existsSync(indexPath)) {
@@ -254,6 +256,9 @@ app.whenReady().then(() => {
   if (process.platform !== 'darwin') {
     Menu.setApplicationMenu(null)
   }
+  
+  // Register all IPC handlers
+  registerAllHandlers()
   
   setupSecurityHeaders()
   createWindow()
