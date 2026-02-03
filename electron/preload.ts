@@ -97,3 +97,40 @@ const electronAPI: ElectronAPI = {
  */
 contextBridge.exposeInMainWorld('electronAPI', electronAPI)
 
+/**
+ * Vector Store API
+ * Exposes vector database operations to the renderer
+ */
+const vectorStoreAPI = {
+  addEntry: (entry: unknown) => ipcRenderer.invoke('vector-add', entry),
+  search: (queryEmbedding: number[], options?: unknown) => 
+    ipcRenderer.invoke('vector-search', queryEmbedding, options),
+  getEntry: (id: string) => ipcRenderer.invoke('vector-get', id),
+  deleteEntry: (id: string) => ipcRenderer.invoke('vector-delete', id),
+  getStats: () => ipcRenderer.invoke('vector-stats'),
+  sync: () => ipcRenderer.invoke('vector-sync'),
+  generateEmbedding: (text: string, model?: string) => 
+    ipcRenderer.invoke('vector-generate-embedding', text, model),
+  generateBatchEmbeddings: (texts: string[], model?: string) => 
+    ipcRenderer.invoke('vector-generate-batch-embeddings', texts, model),
+  isEmbeddingAvailable: () => ipcRenderer.invoke('vector-embedding-available'),
+}
+
+contextBridge.exposeInMainWorld('vectorStoreAPI', vectorStoreAPI)
+
+/**
+ * Settings API
+ * Exposes settings operations to the renderer
+ */
+const settingsAPI = {
+  getSettings: () => ipcRenderer.invoke('settings-get'),
+  saveSettings: (settings: unknown) => ipcRenderer.invoke('settings-save', settings),
+  setApiKey: (key: string, value: string) => 
+    ipcRenderer.invoke('settings-set-api-key', key, value),
+  removeApiKey: (key: string) => ipcRenderer.invoke('settings-remove-api-key', key),
+  hasApiKey: (key: string) => ipcRenderer.invoke('settings-has-api-key', key),
+  getApiKey: (key: string) => ipcRenderer.invoke('settings-get-api-key', key),
+}
+
+contextBridge.exposeInMainWorld('settingsAPI', settingsAPI)
+

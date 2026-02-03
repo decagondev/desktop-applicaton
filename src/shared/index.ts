@@ -14,3 +14,19 @@ export type {
   ElectronContextValue,
   ElectronProviderProps,
 } from './context/ElectronContext';
+
+// Services
+export {
+  BaseService,
+  success,
+  failure,
+  withRetry,
+} from './services';
+export type {
+  IService,
+  IHealthCheckable,
+  IHealthStatus,
+  IRetryable,
+  IRateLimited,
+  IResult,
+} from './services';
