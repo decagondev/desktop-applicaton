@@ -1,19 +1,28 @@
-# Deca Dash
+# Second Brain Desktop Application
 
-A modern, extensible real-time system monitoring dashboard built with React 19, Vite 7, TypeScript, and Electron 40. Features memory, network, and process monitoring with interactive charts and a clean, responsive UI.
+A secure, local-first knowledge management desktop application that enables users to ingest, organize, vectorize, and interact with diverse data sources through an AI-powered chat interface with Retrieval-Augmented Generation (RAG).
 
-![Deca Dash Screenshot](docs/assets/screenshot.png)
+Built with React 19, Vite 7, TypeScript, and Electron 40. Features modular architecture, SOLID principles, and comprehensive testing.
+
+![Second Brain Screenshot](docs/assets/screenshot.png)
 
 ## Features
 
-- **Real-time System Monitoring**: Memory, network, and process stats updated every 2 seconds
-- **Top Processes Widget**: View top 10 processes by CPU or memory usage
-- **Interactive Charts**: Line graphs and pie charts powered by Recharts
-- **Kiosk Mode**: Fullscreen distraction-free monitoring
-- **Modern Stack**: React 19.2.4, Vite 7.3.1, Electron 40.1.0, TypeScript 5.7
+### Core Capabilities
+- **AI-Powered Chat**: Query your knowledge base with Groq LLM and RAG for context-aware responses
+- **Document Ingestion**: Upload and vectorize PDFs, DOCX, Markdown, and HTML files
+- **Web Search**: Ingest web URLs and search via Tavily integration
+- **GitHub Integration**: Clone repositories and vectorize code, issues, PRs, and diffs
+- **Voice Notes**: Record, transcribe (Whisper), and vectorize spoken notes
+- **Markdown Editor**: Write and auto-vectorize notes with a clean editor
+
+### Technical Features
+- **Local-First Storage**: In-memory vector database with SQLite backup
+- **Secure API Keys**: Electron safeStorage for encrypted credential storage
+- **Real-time Dashboard**: System monitoring (memory, network, processes) - toggleable
+- **Modern Stack**: React 19, Vite 7, Electron 40, TypeScript 5.7
 - **SOLID Architecture**: Feature-based modular design with dependency injection
-- **Tailwind CSS v4**: Modern utility-first styling with Vite plugin
-- **Comprehensive Testing**: Vitest with React Testing Library
+- **Comprehensive Testing**: Vitest with 80% coverage target
 - **CI/CD Ready**: GitHub Actions workflow included
 - **Electron Security**: Context isolation, CSP, secure IPC
 
@@ -26,7 +35,7 @@ npm install
 # Start web development server
 npm run dev
 
-# Start desktop development (with system monitoring)
+# Start desktop development
 npm run dev:desktop
 
 # Run tests
@@ -57,10 +66,23 @@ npm run build:desktop
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/ARCHITECTURE.md) | System design and SOLID principles |
+| [Getting Started](docs/GETTING-STARTED.md) | Development setup guide |
+| [Feature Development](docs/FEATURE-DEVELOPMENT.md) | How to create new features |
 | [API Reference](docs/API.md) | IPC handlers, Electron API, type definitions |
 | [Extension Guide](docs/EXTENSION-GUIDE.md) | How to add new data sources and widgets |
-| [Dashboard Types](docs/DASHBOARD-TYPES.md) | Building REST, DBUS, and monitoring dashboards |
 | [Contributing](docs/CONTRIBUTING.md) | Development workflow and guidelines |
+| [PRD](docs/DESKTOP-2ndBRAIN-PRD.md) | Product Requirements Document |
+
+### Architecture Documentation
+
+| Document | Description |
+|----------|-------------|
+| [System Analysis](.lbi/docs/architecture/system-analysis.md) | Overall system architecture |
+| [Technology Stack](.lbi/docs/architecture/technology-stack.md) | Technologies and versions |
+| [Component Architecture](.lbi/docs/architecture/component-architecture.md) | React component patterns |
+| [Data Architecture](.lbi/docs/architecture/data-architecture.md) | Data models and storage |
+| [Integration Landscape](.lbi/docs/architecture/integration-landscape.md) | External API integrations |
+| [Security Architecture](.lbi/docs/architecture/security-architecture.md) | Security model |
 
 ## Project Structure
 
@@ -70,11 +92,13 @@ npm run build:desktop
 │   └── preload.ts           # Secure API bridge
 ├── src/
 │   ├── features/            # Feature modules
-│   │   └── dashboard/       # System stats dashboard
-│   │       ├── components/  # UI components
-│   │       ├── hooks/       # Data fetching hooks
-│   │       ├── context/     # State management
-│   │       └── types/       # TypeScript interfaces
+│   │   ├── dashboard/       # System stats dashboard
+│   │   ├── chat/            # AI chat interface (planned)
+│   │   ├── ingestion/       # Document ingestion (planned)
+│   │   ├── vector-store/    # Vector database (planned)
+│   │   ├── settings/        # App settings (planned)
+│   │   ├── notes/           # Markdown editor (planned)
+│   │   └── github/          # GitHub integration (planned)
 │   ├── shared/              # Shared utilities
 │   │   ├── context/         # App-wide contexts
 │   │   ├── lib/             # Utility functions
@@ -82,6 +106,13 @@ npm run build:desktop
 │   ├── test/                # Test utilities and mocks
 │   └── main.tsx             # Entry point
 ├── docs/                    # Documentation
+├── .lbi/                    # LBI workflow specs and docs
+│   ├── memory/              # Constitution
+│   ├── docs/                # Architecture documentation
+│   └── specs/               # Feature specifications
+├── .cursor/                 # Cursor configuration
+│   ├── commands/            # LBI commands
+│   └── rules/               # Project conventions
 └── .github/workflows/       # CI/CD configuration
 ```
 
@@ -89,45 +120,47 @@ npm run build:desktop
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| React | 19.2.4 | UI framework |
-| Vite | 7.3.1 | Build tool |
-| Electron | 40.1.0 | Desktop framework |
+| React | 19.x | UI framework |
+| Vite | 7.x | Build tool |
+| Electron | 40+ | Desktop framework |
 | TypeScript | 5.7 | Type safety |
-| Tailwind CSS | 4.1 | Styling |
+| Tailwind CSS | 4.x | Styling |
 | Recharts | 2.x | Data visualization |
-| systeminformation | 5.x | System stats |
-| Vitest | 4.0 | Testing |
-| electron-builder | 26.7 | App packaging |
+| Vitest | 4.x | Testing |
+| LangChain.js | - | RAG orchestration |
+| Groq SDK | - | LLM integration |
+| SQLite | - | Local storage |
 
 ## Architecture Overview
 
-Deca Dash follows SOLID principles and a feature-based modular architecture:
+Second Brain follows SOLID principles and a feature-based modular architecture:
 
 ```mermaid
 flowchart TB
-    subgraph MainProcess["Electron Main Process"]
-        IPC["IPC Handlers<br/>(stats API)"]
-        SI["System Info<br/>(si library)"]
-        WM["Window Management<br/>(kiosk, security)"]
+    subgraph MainProcess[Electron Main Process]
+        IPC[IPC Handlers]
+        VectorDB[Vector Database]
+        SQLite[SQLite Storage]
+        APIs[External APIs<br/>Groq, Tavily, GitHub]
     end
 
-    subgraph Preload["Preload Script"]
-        CB["contextBridge<br/>secure API exposure"]
+    subgraph Preload[Preload Script]
+        CB[contextBridge<br/>secure API exposure]
     end
 
-    subgraph Renderer["Renderer Process"]
-        subgraph React["React Application"]
-            Hooks["Hooks<br/>(Data Fetch)"]
-            Contexts["Contexts<br/>(State)"]
-            Components["Dashboard<br/>Components"]
+    subgraph Renderer[Renderer Process]
+        subgraph React[React Application]
+            Chat[Chat Feature]
+            Ingestion[Ingestion Feature]
+            Notes[Notes Feature]
+            Settings[Settings Feature]
+            Dashboard[Dashboard Feature]
         end
     end
 
-    IPC --> CB
-    SI --> CB
-    CB --> Hooks
-    Hooks --> Contexts
-    Contexts --> Components
+    MainProcess <--> CB
+    CB <--> React
+    APIs <--> MainProcess
 ```
 
 ## Security
@@ -139,11 +172,27 @@ Electron security features enabled:
 - Content Security Policy headers
 - Navigation restriction to trusted origins
 - Secure IPC via contextBridge
+- `safeStorage` for API keys
+
+## Development Workflow
+
+This project uses the LBI (Lean Build Intelligence) workflow:
+
+```
+/lbi.request → /lbi.specify → /lbi.design → /lbi.plan → /lbi.implement → /lbi.tests → /lbi.push
+```
+
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for details.
 
 ## Requirements
 
 - Node.js 20+
 - npm 10+
+- API Keys (optional):
+  - Groq API key (for chat)
+  - OpenAI API key (for embeddings/transcription)
+  - Tavily API key (for web search)
+  - GitHub token (for repo integration)
 
 ## License
 

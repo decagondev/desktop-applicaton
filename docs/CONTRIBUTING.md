@@ -1,10 +1,11 @@
-# Contributing to Deca Dash
+# Contributing to Second Brain Desktop Application
 
-Thank you for your interest in contributing! This guide covers the development workflow, coding standards, and best practices for contributing to Deca Dash.
+Thank you for your interest in contributing! This guide covers the development workflow, coding standards, and best practices.
 
 ## Table of Contents
 
 - [Development Setup](#development-setup)
+- [LBI Workflow](#lbi-workflow)
 - [Git Workflow](#git-workflow)
 - [Coding Standards](#coding-standards)
 - [Architecture Guidelines](#architecture-guidelines)
@@ -26,8 +27,8 @@ Thank you for your interest in contributing! This guide covers the development w
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/deca-dash.git
-cd deca-dash
+git clone https://github.com/your-org/second-brain.git
+cd second-brain
 
 # Install dependencies
 npm install
@@ -48,7 +49,6 @@ npm run dev:desktop
 | `npm run test:run` | Run tests once |
 | `npm run test:coverage` | Run tests with coverage report |
 | `npm run lint` | Run ESLint |
-| `npm run electron:build` | Build Electron code only |
 
 ### IDE Setup
 
@@ -60,17 +60,57 @@ Recommended extensions:
 - TypeScript
 - Tailwind CSS IntelliSense
 
-Recommended settings (`.vscode/settings.json`):
-```json
-{
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "tailwindCSS.experimental.classRegex": [
-    ["className\\s*=\\s*[\"']([^\"']*)[\"']", "([^\"']*)"]
-  ]
-}
+---
+
+## LBI Workflow
+
+This project uses the LBI (Lean Build Intelligence) spec-driven development workflow.
+
+### Workflow Steps
+
+For each feature, follow this workflow:
+
 ```
+/lbi.request → /lbi.specify → /lbi.design → /lbi.plan → /lbi.implement → /lbi.tests → /lbi.review → /lbi.push
+```
+
+### Step Details
+
+1. **`/lbi.request`** - Capture the feature request
+   - Creates `.lbi/specs/{feature}/request.md`
+   - Defines user goals, scope, and acceptance criteria
+
+2. **`/lbi.specify`** - Create technical specification
+   - Creates `.lbi/specs/{feature}/spec.md`
+   - Defines requirements, components, test scenarios
+
+3. **`/lbi.design`** - Create design documentation
+   - Creates `.lbi/specs/{feature}/design.md`
+   - Documents architecture decisions, data models, API design
+
+4. **`/lbi.plan`** - Create implementation plan
+   - Creates `.lbi/specs/{feature}/plan.md`
+   - Breaks work into phases and tasks
+
+5. **`/lbi.implement`** - Execute the plan
+   - Follow the plan, commit granularly
+   - Update plan as tasks complete
+
+6. **`/lbi.tests`** - Write and run tests
+   - 80% coverage minimum
+   - All tests must pass
+
+7. **`/lbi.review`** - Code review
+   - Self-review or peer review
+   - Check against constitution
+
+8. **`/lbi.push`** - Merge and push
+   - Merge to main
+   - Clean up feature branch
+
+### Project Constitution
+
+Read `.lbi/memory/constitution.md` for project principles and quality standards. All contributions must comply with the constitution.
 
 ---
 
@@ -78,16 +118,25 @@ Recommended settings (`.vscode/settings.json`):
 
 ### Branch Naming
 
-Use descriptive branch names with prefixes:
+Use the epic and user story convention:
 
-| Prefix | Purpose | Example |
-|--------|---------|---------|
-| `feature/` | New features | `feature/disk-monitoring` |
-| `fix/` | Bug fixes | `fix/memory-leak` |
-| `refactor/` | Code refactoring | `refactor/stats-hook` |
-| `docs/` | Documentation | `docs/api-reference` |
-| `test/` | Test additions | `test/network-section` |
-| `chore/` | Maintenance | `chore/update-deps` |
+```
+feature/E{epic}-US{story}-{slug}    # New features
+fix/{description}                    # Bug fixes
+chore/{description}                  # Maintenance
+docs/{description}                   # Documentation only
+refactor/{description}               # Code refactoring
+```
+
+### Examples
+
+```
+feature/E1-US1.1-vector-db
+feature/E2-US2.1-document-upload
+feature/E3-US3.1-chat-interface
+fix/memory-leak-in-polling
+chore/update-dependencies
+```
 
 ### Workflow Steps
 
@@ -95,23 +144,23 @@ Use descriptive branch names with prefixes:
    ```bash
    git checkout main
    git pull origin main
-   git checkout -b feature/my-feature
+   git checkout -b feature/E1-US1.1-vector-db
    ```
 
 2. **Make atomic commits**
    ```bash
    # Each commit should be one logical change
-   git add src/features/dashboard/components/MyWidget.tsx
-   git commit -m "feat: add MyWidget component"
+   git add src/features/vector-store/types/
+   git commit -m "feat: add VectorStore type definitions"
    
-   git add src/features/dashboard/hooks/useMyData.ts
-   git commit -m "feat: add useMyData hook"
+   git add src/features/vector-store/services/
+   git commit -m "feat: implement VectorStoreService"
    ```
 
 3. **Write tests for your feature**
    ```bash
-   git add src/features/dashboard/components/__tests__/MyWidget.test.tsx
-   git commit -m "test: add tests for MyWidget"
+   git add src/features/vector-store/__tests__/
+   git commit -m "test: add VectorStore unit tests"
    ```
 
 4. **Run tests before merging**
@@ -124,9 +173,8 @@ Use descriptive branch names with prefixes:
 5. **Merge to main**
    ```bash
    git checkout main
-   git merge --no-ff feature/my-feature
-   git push origin main
-   git branch -d feature/my-feature
+   git merge feature/E1-US1.1-vector-db
+   git branch -d feature/E1-US1.1-vector-db
    ```
 
 ### Commit Message Format
@@ -134,11 +182,7 @@ Use descriptive branch names with prefixes:
 Use conventional commit format:
 
 ```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer]
+<type>: <description>
 ```
 
 **Types:**
@@ -152,15 +196,11 @@ Use conventional commit format:
 
 **Examples:**
 ```
-feat(dashboard): add disk usage widget
-
-fix(memory): correct percentage calculation
-
-docs(api): add IPC handler documentation
-
-refactor(stats): extract polling logic to custom hook
-
-test(network): add NetworkSection component tests
+feat: add vector store with SQLite backup
+fix: correct memory leak in stats polling
+docs: update architecture documentation
+test: add unit tests for PdfParser
+refactor: extract embedding generation to service
 ```
 
 ---
@@ -170,115 +210,75 @@ test(network): add NetworkSection component tests
 ### TypeScript
 
 - Use strict TypeScript configuration
-- Define interfaces for all data structures
+- Prefix interfaces with `I` (e.g., `IVectorEntry`)
 - Use explicit return types for functions
-- Avoid `any` type
+- Avoid `any` type without justification
 
 ```typescript
-// ✅ Good
-interface IWidgetProps {
-  title: string;
-  data: IWidgetData[];
-  onRefresh: () => void;
+// Good
+interface IVectorEntry {
+  id: string;
+  content: string;
+  embedding: number[];
 }
 
-function Widget({ title, data, onRefresh }: IWidgetProps): React.ReactElement {
-  return <div>{title}</div>;
+function processEntry(entry: IVectorEntry): IProcessedEntry {
+  return { ...entry, processed: true };
 }
 
-// ❌ Bad
-function Widget(props: any) {
-  return <div>{props.title}</div>;
+// Bad
+function processEntry(entry: any) {
+  return { ...entry, processed: true };
 }
 ```
 
 ### React Components
 
 - Use functional components with hooks
-- Use `memo` for performance-critical components
+- Define prop interfaces with JSDoc
 - Keep components focused (single responsibility)
 - Extract complex logic to custom hooks
 
 ```typescript
-// ✅ Good - Focused component with extracted logic
-function MemorySectionComponent(): React.ReactElement {
-  const { memory, isLoading, error } = useStats();
-  
-  if (error) return <ErrorState error={error} />;
-  if (isLoading) return <LoadingState />;
-  
-  return <MemoryDisplay data={memory} />;
+/**
+ * Props for the MessageList component
+ */
+interface IMessageListProps {
+  /** Array of messages to display */
+  messages: IChatMessage[];
+  /** Whether messages are loading */
+  isLoading?: boolean;
 }
 
-export const MemorySection = memo(MemorySectionComponent);
-```
-
-### Styling
-
-- Use Tailwind CSS utility classes
-- Use responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`)
-- Keep class names organized (layout → spacing → colors → effects)
-
-```typescript
-// ✅ Good - Organized class names
-<div className="
-  flex flex-col sm:flex-row      {/* Layout */}
-  gap-4 p-4 sm:p-6               {/* Spacing */}
-  bg-slate-800 text-slate-200    {/* Colors */}
-  rounded-lg transition-colors   {/* Effects */}
-">
-
-// ❌ Bad - Unorganized
-<div className="text-slate-200 flex rounded-lg p-4 gap-4 bg-slate-800">
+export function MessageList({ 
+  messages, 
+  isLoading = false 
+}: IMessageListProps): React.ReactElement {
+  // ...
+}
 ```
 
 ### File Organization
 
+Follow the feature module pattern:
+
 ```
-src/features/my-feature/
+src/features/{feature}/
 ├── components/
-│   ├── MyComponent.tsx
-│   ├── MyOtherComponent.tsx
+│   ├── Component.tsx
 │   └── __tests__/
-│       ├── MyComponent.test.tsx
-│       └── MyOtherComponent.test.tsx
+│       └── Component.test.tsx
 ├── hooks/
-│   ├── useMyHook.ts
+│   ├── useHook.ts
 │   └── __tests__/
-│       └── useMyHook.test.ts
+│       └── useHook.test.ts
 ├── context/
-│   └── MyContext.tsx
+│   └── FeatureContext.tsx
+├── services/
+│   └── FeatureService.ts
 ├── types/
-│   └── my-feature.types.ts
+│   └── feature.types.ts
 └── index.ts  # Barrel exports
-```
-
-### Documentation
-
-- Add JSDoc comments to all public functions
-- Document component props with JSDoc
-- Include usage examples in comments
-
-```typescript
-/**
- * StatCard displays a single metric with optional trend indicator.
- * 
- * @param props - Component props
- * @returns React element
- * 
- * @example
- * ```tsx
- * <StatCard
- *   label="Memory Usage"
- *   value="8.5"
- *   unit="GB"
- *   trend="up"
- * />
- * ```
- */
-export function StatCard(props: IStatCardProps): React.ReactElement {
-  // ...
-}
 ```
 
 ---
@@ -287,51 +287,15 @@ export function StatCard(props: IStatCardProps): React.ReactElement {
 
 ### SOLID Principles
 
-#### Single Responsibility
-Each module/component should have one reason to change.
+All code must follow SOLID principles:
 
-```typescript
-// ✅ Good - Single responsibility
-function MemoryChart({ data }: { data: IMemoryStats }) { /* only renders chart */ }
-function MemoryStats({ stats }: { stats: IMemoryStats }) { /* only displays stats */ }
+1. **Single Responsibility**: One reason to change per class/module
+2. **Open/Closed**: Open for extension, closed for modification
+3. **Liskov Substitution**: Subtypes substitutable for base types
+4. **Interface Segregation**: Small, focused interfaces
+5. **Dependency Inversion**: Depend on abstractions
 
-// ❌ Bad - Multiple responsibilities
-function MemorySection() {
-  // Fetches data, formats it, displays stats, renders chart all in one
-}
-```
-
-#### Open/Closed
-Open for extension, closed for modification.
-
-```typescript
-// ✅ Good - Configurable via props
-function LineGraph({ lines, colors, height }: ILineGraphProps) {
-  // Can be extended with new line configurations without modifying
-}
-
-// ❌ Bad - Hardcoded configuration
-function MemoryLineGraph() {
-  // Only works for memory, can't be reused
-}
-```
-
-#### Dependency Inversion
-Depend on abstractions, not concrete implementations.
-
-```typescript
-// ✅ Good - Depends on context abstraction
-function MyComponent() {
-  const { data, refresh } = useStats();  // Uses context hook
-  return <div>{data}</div>;
-}
-
-// ❌ Bad - Directly depends on implementation
-function MyComponent() {
-  const data = window.electronAPI.getData();  // Direct dependency
-  return <div>{data}</div>;
-}
-```
+See `.cursor/rules/solid-principles.mdc` for detailed examples.
 
 ### Feature Module Pattern
 
@@ -340,115 +304,61 @@ Each feature should be self-contained:
 1. **Components**: UI elements
 2. **Hooks**: Business logic and data fetching
 3. **Context**: State management
-4. **Types**: TypeScript interfaces
-5. **Index**: Public exports
+4. **Services**: External integrations
+5. **Types**: TypeScript interfaces
+6. **Index**: Public exports (barrel file)
 
-```typescript
-// src/features/my-feature/index.ts
-// Only export what's needed externally
-export { MySection } from './components/MySection';
-export { useMyData } from './hooks/useMyData';
-export { MyProvider, useMyContext } from './context/MyContext';
-export type { IMyData, IMyConfig } from './types/my-feature.types';
-```
+### IPC Pattern
+
+For Electron IPC communication:
+
+1. Define handler in `electron/main.ts` or `electron/modules/`
+2. Expose via `electron/preload.ts`
+3. Add types in `src/shared/types/`
+4. Use via `window.{api}` in renderer
+
+See `.cursor/rules/electron-ipc.mdc` for details.
 
 ---
 
 ## Testing Requirements
 
-### Test Coverage
+### Coverage
 
-- Aim for 80%+ coverage on business logic
-- All components should have basic rendering tests
-- All hooks should have unit tests
-- All IPC handlers should be tested
+- Minimum 80% coverage for new code
+- All public functions must have tests
+- Test edge cases and error conditions
 
 ### Test Structure
 
 ```typescript
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MyComponent } from '../MyComponent';
-import { setupElectronMock, clearElectronMock } from '@/test/mocks/electron';
 
-describe('MyComponent', () => {
+describe('ComponentName', () => {
   beforeEach(() => {
-    setupElectronMock();
+    // Setup
   });
 
   afterEach(() => {
-    clearElectronMock();
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
-  describe('rendering', () => {
-    it('renders component heading', () => {
-      render(<MyComponent />);
-      expect(screen.getByText('My Component')).toBeInTheDocument();
-    });
-
-    it('shows loading state initially', () => {
-      render(<MyComponent />);
-      expect(screen.getByTestId('loading')).toBeInTheDocument();
-    });
-  });
-
-  describe('interactions', () => {
-    it('calls refresh on button click', async () => {
-      const mockRefresh = vi.fn();
-      render(<MyComponent onRefresh={mockRefresh} />);
-      
-      fireEvent.click(screen.getByText('Refresh'));
-      
-      expect(mockRefresh).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('error handling', () => {
-    it('displays error message on failure', async () => {
-      // Setup error state
-      render(<MyComponent error="Something went wrong" />);
-      
-      expect(screen.getByText(/error/i)).toBeInTheDocument();
+  describe('feature', () => {
+    it('should do expected behavior', () => {
+      // Arrange
+      // Act
+      // Assert
     });
   });
 });
 ```
 
-### Testing Hooks
+### Run Tests
 
-```typescript
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useMyHook } from '../useMyHook';
-
-describe('useMyHook', () => {
-  it('returns initial state', () => {
-    const { result } = renderHook(() => useMyHook());
-    
-    expect(result.current.data).toBeNull();
-    expect(result.current.isLoading).toBe(true);
-  });
-
-  it('fetches data on mount', async () => {
-    const { result } = renderHook(() => useMyHook());
-    
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-    
-    expect(result.current.data).not.toBeNull();
-  });
-
-  it('refreshes data on demand', async () => {
-    const { result } = renderHook(() => useMyHook());
-    
-    await act(async () => {
-      await result.current.refresh();
-    });
-    
-    expect(result.current.data).toBeDefined();
-  });
-});
+```bash
+npm run test          # Watch mode
+npm run test:run      # Single run
+npm run test:coverage # With coverage
 ```
 
 ---
@@ -458,17 +368,28 @@ describe('useMyHook', () => {
 ### Required Documentation
 
 1. **JSDoc comments** for all public functions
-2. **README updates** for new features
-3. **API documentation** for new IPC handlers
-4. **Type definitions** for new interfaces
+2. **README updates** for user-facing features
+3. **Architecture docs** for significant changes
+4. **Type exports** documented in index.ts
 
-### Documentation Checklist
+### JSDoc Example
 
-- [ ] JSDoc comments added
-- [ ] README.md updated (if user-facing feature)
-- [ ] API.md updated (if new IPC handlers)
-- [ ] EXTENSION-GUIDE.md updated (if new patterns)
-- [ ] Type exports documented
+```typescript
+/**
+ * Search the vector store for relevant entries
+ * 
+ * @param query - Search query text
+ * @param options - Search options
+ * @returns Array of search results with relevance scores
+ * @throws {VectorStoreError} If the store is not initialized
+ * 
+ * @example
+ * ```typescript
+ * const results = await vectorStore.search('how to deploy', { limit: 5 });
+ * ```
+ */
+async search(query: string, options?: ISearchOptions): Promise<ISearchResult[]>
+```
 
 ---
 
@@ -489,36 +410,19 @@ describe('useMyHook', () => {
 3. **Build successfully**
    ```bash
    npm run build
-   npm run build:desktop
    ```
 
 4. **Update documentation** if needed
 
-### PR Description Template
+### PR Checklist
 
-```markdown
-## Summary
-Brief description of changes.
-
-## Changes
-- Added X component
-- Updated Y hook
-- Fixed Z issue
-
-## Testing
-- [ ] Unit tests added
-- [ ] Manual testing completed
-- [ ] All tests passing
-
-## Screenshots
-(If UI changes)
-
-## Checklist
 - [ ] Code follows project style guidelines
 - [ ] Tests added for new functionality
+- [ ] All tests passing
 - [ ] Documentation updated
-- [ ] No breaking changes (or documented)
-```
+- [ ] Commit messages follow convention
+- [ ] Branch named correctly
+- [ ] LBI workflow followed
 
 ### Review Criteria
 
@@ -526,17 +430,16 @@ PRs will be reviewed for:
 
 1. **Code quality**: Follows coding standards
 2. **Architecture**: Follows SOLID principles
-3. **Testing**: Adequate test coverage
+3. **Testing**: Adequate test coverage (80%+)
 4. **Documentation**: Proper comments and docs
-5. **Performance**: No obvious performance issues
-6. **Security**: No security vulnerabilities
+5. **Security**: No security vulnerabilities
+6. **Constitution compliance**: Follows project principles
 
 ---
 
 ## Questions?
 
-If you have questions about contributing:
-
-1. Check existing documentation
-2. Search existing issues
-3. Open a new issue for discussion
+1. Check existing documentation in `docs/` and `.lbi/docs/`
+2. Read the constitution at `.lbi/memory/constitution.md`
+3. Check Cursor rules in `.cursor/rules/`
+4. Open an issue for discussion
