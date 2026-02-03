@@ -11,7 +11,6 @@ import type {
   IVectorSearchResult,
   IVectorStoreStats,
   VectorSourceType,
-  DEFAULT_SEARCH_OPTIONS,
 } from '../types/vector-store.types';
 
 /**
