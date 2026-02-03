@@ -1,0 +1,242 @@
+---
+description: "TypeScript conventions and interface patterns for Second Brain app"
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: true
+---
+
+# TypeScript Conventions
+
+Follow these TypeScript patterns for consistency across the codebase.
+
+## Interface Naming
+
+Prefix interfaces with `I`:
+
+```typescript
+// Good
+interface IMemoryStats {
+  total: number;
+  used: number;
+  free: number;
+}
+
+interface IChatMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+}
+
+// Bad
+interface MemoryStats { }    // Missing I prefix
+type IUserType = { }         // Type aliases don't use I prefix
+```
+
+## Type vs Interface
+
+- **Interface**: For object shapes, especially those that may be extended
+- **Type**: For unions, primitives, function signatures, and computed types
+
+```typescript
+// Interface for object shapes
+interface IUserProfile {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// Type for unions
+type MessageRole = 'user' | 'assistant' | 'system';
+
+// Type for function signatures
+type OnMessageCallback = (message: IChatMessage) => void;
+
+// Type for computed types
+type PartialUser = Partial<IUserProfile>;
+```
+
+## Export Patterns
+
+### Types from Feature Modules
+
+```typescript
+// src/features/chat/types/chat.types.ts
+export interface IChatMessage {
+  id: string;
+  content: string;
+}
+
+export interface IChatContext {
+  messages: IChatMessage[];
+  sendMessage: (content: string) => Promise<void>;
+}
+
+export type ChatRole = 'user' | 'assistant' | 'system';
+```
+
+### Re-export in Barrel
+
+```typescript
+// src/features/chat/index.ts
+export type {
+  IChatMessage,
+  IChatContext,
+  ChatRole,
+} from './types/chat.types';
+```
+
+## Function Typing
+
+Always type parameters and return values:
+
+```typescript
+// Good
+function formatBytes(bytes: number, decimals?: number): string {
+  // implementation
+}
+
+async function fetchData(url: string): Promise<IResponse | null> {
+  // implementation
+}
+
+// Bad
+function formatBytes(bytes, decimals) {  // Missing types
+  // implementation
+}
+```
+
+## React Component Props
+
+```typescript
+/**
+ * Props for the MessageList component
+ */
+interface IMessageListProps {
+  /** Array of messages to display */
+  messages: IChatMessage[];
+  /** Whether messages are loading */
+  isLoading?: boolean;
+  /** Callback when source is clicked */
+  onSourceClick?: (sourceId: string) => void;
+  /** Optional CSS class */
+  className?: string;
+}
+
+export function MessageList({
+  messages,
+  isLoading = false,
+  onSourceClick,
+  className,
+}: IMessageListProps): React.ReactElement {
+  // implementation
+}
+```
+
+## Hook Return Types
+
+```typescript
+interface UseVectorStoreReturn {
+  entries: IVectorEntry[];
+  isLoading: boolean;
+  error: string | null;
+  addEntry: (entry: IVectorEntry) => Promise<void>;
+  search: (query: string) => Promise<ISearchResult[]>;
+}
+
+export function useVectorStore(): UseVectorStoreReturn {
+  // implementation
+}
+
+// Export the type for consumers
+export type { UseVectorStoreReturn };
+```
+
+## Context Types
+
+```typescript
+interface ISettingsContext {
+  apiKeys: IApiKeys;
+  featureFlags: IFeatureFlags;
+  updateApiKey: (key: string, value: string) => Promise<void>;
+  toggleFeature: (feature: string, enabled: boolean) => void;
+}
+
+const SettingsContext = createContext<ISettingsContext | null>(null);
+```
+
+## Strict Mode Rules
+
+TypeScript strict mode is enabled. Follow these rules:
+
+1. **No implicit any**: Always provide types
+2. **Strict null checks**: Handle null/undefined explicitly
+3. **No unused locals**: Remove or use all variables
+4. **No unused parameters**: Prefix with `_` if intentionally unused
+
+```typescript
+// Handle null explicitly
+const api = window.electronAPI;
+if (!api) {
+  throw new Error('Electron API not available');
+}
+await api.getMemoryStats();
+
+// Unused parameter
+ipcMain.handle('action', async (_event, data) => {
+  // _event is intentionally unused
+});
+```
+
+## Generics
+
+```typescript
+// Good generic naming
+interface IApiResponse<TData> {
+  data: TData;
+  status: number;
+  error?: string;
+}
+
+function createStore<TState>(initialState: TState): IStore<TState> {
+  // implementation
+}
+
+// Avoid single letter generics without context
+interface IResponse<T> { }  // Less clear
+interface IResponse<TData> { }  // Better
+```
+
+## Enums vs Union Types
+
+Prefer union types over enums:
+
+```typescript
+// Preferred: Union type
+type SourceType = 'document' | 'web' | 'github' | 'note';
+
+// Avoid: Enum
+enum SourceType {
+  Document = 'document',
+  Web = 'web',
+}
+```
+
+## Constants with Type Safety
+
+```typescript
+// Use as const for literal types
+export const CHART_COLORS = {
+  memory: '#3b82f6',
+  network: '#22c55e',
+} as const;
+
+// Type from constant
+type ChartColorKey = keyof typeof CHART_COLORS;
+```
+
+## Do NOT
+
+- Use `any` without explicit justification comment
+- Skip return types on exported functions
+- Use `!` non-null assertion without null check
+- Create interfaces without `I` prefix
+- Export types from files other than `types/` or `index.ts`

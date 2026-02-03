@@ -1,0 +1,277 @@
+---
+description: "SOLID principles enforcement for Second Brain app"
+globs: ["src/**/*", "electron/**/*"]
+alwaysApply: true
+---
+
+# SOLID Principles
+
+All code must adhere to SOLID principles for maintainability and extensibility.
+
+## S - Single Responsibility Principle
+
+Each class, module, or function should have one reason to change.
+
+### Rules
+
+- Maximum 300 lines per file
+- One class per file (with exceptions for small related classes)
+- Functions should do one thing
+- Components should render one logical unit
+
+### Good Example
+
+```typescript
+// Separate responsibilities into different files
+
+// PdfParser.ts - Only parses PDFs
+export class PdfParser implements IDocumentParser {
+  parse(buffer: Buffer): Promise<IDocument> {
+    // PDF parsing logic only
+  }
+}
+
+// MarkdownParser.ts - Only parses Markdown
+export class MarkdownParser implements IDocumentParser {
+  parse(content: string): Promise<IDocument> {
+    // Markdown parsing logic only
+  }
+}
+
+// EmbeddingService.ts - Only handles embeddings
+export class EmbeddingService {
+  generateEmbedding(text: string): Promise<number[]> {
+    // Embedding generation only
+  }
+}
+```
+
+### Bad Example
+
+```typescript
+// DON'T: One class doing multiple unrelated things
+class DocumentManager {
+  parseDocument() { }      // Parsing responsibility
+  generateEmbedding() { }  // Embedding responsibility
+  saveToDatabase() { }     // Storage responsibility
+  sendNotification() { }   // Notification responsibility
+}
+```
+
+## O - Open/Closed Principle
+
+Open for extension, closed for modification.
+
+### Rules
+
+- Use interfaces for extensibility
+- Prefer composition over inheritance
+- Use factory patterns for object creation
+- Add new features via new classes, not modifying existing ones
+
+### Good Example
+
+```typescript
+// Interface defines contract
+interface IDocumentParser {
+  parse(input: Buffer | string): Promise<IDocument>;
+  supports(mimeType: string): boolean;
+}
+
+// Easy to add new parsers without modifying existing code
+class PdfParser implements IDocumentParser {
+  supports(mimeType: string): boolean {
+    return mimeType === 'application/pdf';
+  }
+  parse(buffer: Buffer): Promise<IDocument> { /* ... */ }
+}
+
+class DocxParser implements IDocumentParser {
+  supports(mimeType: string): boolean {
+    return mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  }
+  parse(buffer: Buffer): Promise<IDocument> { /* ... */ }
+}
+
+// Factory creates appropriate parser
+class ParserFactory {
+  private parsers: IDocumentParser[] = [
+    new PdfParser(),
+    new DocxParser(),
+    new MarkdownParser(),
+  ];
+
+  getParser(mimeType: string): IDocumentParser | null {
+    return this.parsers.find(p => p.supports(mimeType)) ?? null;
+  }
+}
+```
+
+## L - Liskov Substitution Principle
+
+Subtypes must be substitutable for their base types.
+
+### Rules
+
+- Derived classes must honor base class contracts
+- Don't throw unexpected exceptions in overrides
+- Maintain expected behavior in all implementations
+
+### Good Example
+
+```typescript
+// All implementations work the same way
+interface IVectorStore {
+  add(entry: IVectorEntry): Promise<void>;
+  search(query: string, limit: number): Promise<ISearchResult[]>;
+}
+
+class InMemoryVectorStore implements IVectorStore {
+  async add(entry: IVectorEntry): Promise<void> {
+    // Works as expected
+  }
+  async search(query: string, limit: number): Promise<ISearchResult[]> {
+    // Returns results as expected
+  }
+}
+
+class SqliteVectorStore implements IVectorStore {
+  async add(entry: IVectorEntry): Promise<void> {
+    // Also works as expected - can substitute
+  }
+  async search(query: string, limit: number): Promise<ISearchResult[]> {
+    // Also returns results as expected
+  }
+}
+```
+
+## I - Interface Segregation Principle
+
+Clients should not be forced to depend on interfaces they don't use.
+
+### Rules
+
+- Create small, focused interfaces
+- Split large interfaces into smaller ones
+- Clients should implement only what they need
+
+### Good Example
+
+```typescript
+// Small, focused interfaces
+interface IReadableStore {
+  get(id: string): Promise<IEntry | null>;
+  search(query: string): Promise<IEntry[]>;
+}
+
+interface IWritableStore {
+  add(entry: IEntry): Promise<void>;
+  update(id: string, entry: IEntry): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+interface ISyncableStore {
+  sync(): Promise<void>;
+  getLastSyncTime(): Date;
+}
+
+// Implement only what's needed
+class ReadOnlyCache implements IReadableStore {
+  get(id: string): Promise<IEntry | null> { /* ... */ }
+  search(query: string): Promise<IEntry[]> { /* ... */ }
+  // Doesn't need write or sync methods
+}
+
+class FullVectorStore implements IReadableStore, IWritableStore, ISyncableStore {
+  // Implements all interfaces
+}
+```
+
+### Bad Example
+
+```typescript
+// DON'T: One large interface forcing unused methods
+interface IStore {
+  get(id: string): Promise<IEntry | null>;
+  search(query: string): Promise<IEntry[]>;
+  add(entry: IEntry): Promise<void>;
+  update(id: string, entry: IEntry): Promise<void>;
+  delete(id: string): Promise<void>;
+  sync(): Promise<void>;
+  backup(): Promise<void>;
+  restore(): Promise<void>;
+  migrate(): Promise<void>;
+}
+```
+
+## D - Dependency Inversion Principle
+
+Depend on abstractions, not concrete implementations.
+
+### Rules
+
+- Use interfaces for dependencies
+- Inject dependencies via constructor or context
+- Don't instantiate dependencies directly in classes
+- Use React Context for component dependency injection
+
+### Good Example
+
+```typescript
+// Depend on abstraction (interface)
+class RagService {
+  constructor(
+    private vectorStore: IVectorStore,
+    private llmClient: ILLMClient,
+  ) {}
+
+  async query(question: string): Promise<IRagResponse> {
+    const context = await this.vectorStore.search(question, 5);
+    const response = await this.llmClient.complete(question, context);
+    return response;
+  }
+}
+
+// React: Use Context for DI
+function ChatWindow() {
+  const vectorStore = useVectorStore();  // From context
+  const settings = useSettings();         // From context
+  
+  // Not: const vectorStore = new VectorStore();
+}
+```
+
+### Context-Based Dependency Injection
+
+```typescript
+// Create context for service
+const VectorStoreContext = createContext<IVectorStore | null>(null);
+
+// Provider injects the implementation
+function VectorStoreProvider({ children }: { children: ReactNode }) {
+  const store = useMemo(() => new InMemoryVectorStore(), []);
+  
+  return (
+    <VectorStoreContext.Provider value={store}>
+      {children}
+    </VectorStoreContext.Provider>
+  );
+}
+
+// Components depend on abstraction
+function useVectorStore(): IVectorStore {
+  const store = useContext(VectorStoreContext);
+  if (!store) throw new Error('VectorStoreProvider required');
+  return store;
+}
+```
+
+## Quick Reference
+
+| Principle | Rule | Check |
+|-----------|------|-------|
+| SRP | One reason to change | Can you describe the class in one sentence without "and"? |
+| OCP | Extend, don't modify | Can you add features without changing existing code? |
+| LSP | Subtypes substitutable | Can derived classes replace base without breaking? |
+| ISP | Small interfaces | Do implementers use all interface methods? |
+| DIP | Depend on abstractions | Are dependencies injected, not instantiated? |

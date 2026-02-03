@@ -1,0 +1,224 @@
+---
+description: "Vitest testing patterns and conventions for Second Brain app"
+globs: ["**/*.test.ts", "**/*.test.tsx", "src/test/**/*"]
+alwaysApply: true
+---
+
+# Testing Conventions
+
+Follow these patterns for writing tests with Vitest.
+
+## Test File Location
+
+Tests are co-located with source files in `__tests__/` subfolders:
+
+```
+src/features/chat/
+├── components/
+│   ├── ChatWindow.tsx
+│   └── __tests__/
+│       └── ChatWindow.test.tsx
+├── hooks/
+│   ├── useChat.ts
+│   └── __tests__/
+│       └── useChat.test.ts
+```
+
+## Test File Naming
+
+- Components: `{ComponentName}.test.tsx`
+- Hooks: `use{HookName}.test.ts`
+- Services: `{ServiceName}.test.ts`
+- Utilities: `{utilName}.test.ts`
+
+## Test Structure
+
+```typescript
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+describe('ComponentName', () => {
+  beforeEach(() => {
+    // Setup
+  });
+
+  afterEach(() => {
+    // Cleanup
+    vi.restoreAllMocks();
+  });
+
+  describe('feature or method', () => {
+    it('should do expected behavior when condition', () => {
+      // Arrange
+      const input = 'test';
+
+      // Act
+      const result = functionUnderTest(input);
+
+      // Assert
+      expect(result).toBe('expected');
+    });
+  });
+});
+```
+
+## Component Testing
+
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect } from 'vitest';
+import { ComponentName } from '../ComponentName';
+
+describe('ComponentName', () => {
+  it('renders correctly', () => {
+    render(<ComponentName prop="value" />);
+    
+    expect(screen.getByText('expected text')).toBeInTheDocument();
+  });
+
+  it('handles user interaction', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    
+    render(<ComponentName onClick={onClick} />);
+    
+    await user.click(screen.getByRole('button'));
+    
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+});
+```
+
+## Hook Testing
+
+```typescript
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { useHookName } from '../useHookName';
+
+describe('useHookName', () => {
+  it('returns initial state', () => {
+    const { result } = renderHook(() => useHookName());
+    
+    expect(result.current.value).toBe('initial');
+  });
+
+  it('updates state on action', async () => {
+    const { result } = renderHook(() => useHookName());
+    
+    await act(async () => {
+      await result.current.doAction();
+    });
+    
+    expect(result.current.value).toBe('updated');
+  });
+});
+```
+
+## Mocking Electron API
+
+```typescript
+// src/test/mocks/electron.ts
+import { vi } from 'vitest';
+
+export const mockElectronAPI = {
+  getMemoryStats: vi.fn().mockResolvedValue({
+    total: 16000000000,
+    used: 8000000000,
+    free: 8000000000,
+    usedPercent: 50,
+  }),
+  // ... other methods
+};
+
+export function setupElectronMock(): void {
+  window.electronAPI = mockElectronAPI;
+}
+
+export function clearElectronMock(): void {
+  delete window.electronAPI;
+}
+```
+
+```typescript
+// In test file
+import { setupElectronMock, clearElectronMock } from '@/test/mocks/electron';
+
+beforeEach(() => {
+  setupElectronMock();
+});
+
+afterEach(() => {
+  clearElectronMock();
+});
+```
+
+## Context Provider Wrapper
+
+```typescript
+// src/test/utils/renderWithProviders.tsx
+import { render, RenderOptions } from '@testing-library/react';
+import { SettingsProvider } from '@features/settings';
+import { VectorStoreProvider } from '@features/vector-store';
+
+function AllProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <SettingsProvider>
+      <VectorStoreProvider>
+        {children}
+      </VectorStoreProvider>
+    </SettingsProvider>
+  );
+}
+
+export function renderWithProviders(
+  ui: React.ReactElement,
+  options?: RenderOptions
+) {
+  return render(ui, { wrapper: AllProviders, ...options });
+}
+```
+
+## Async Testing
+
+```typescript
+it('handles async operation', async () => {
+  const { result } = renderHook(() => useAsyncHook());
+  
+  // Wait for async operation
+  await waitFor(() => {
+    expect(result.current.isLoading).toBe(false);
+  });
+  
+  expect(result.current.data).toBeDefined();
+});
+```
+
+## Coverage Requirements
+
+- Minimum 80% code coverage for new code
+- All public functions must have tests
+- Test edge cases and error conditions
+
+## Run Tests
+
+```bash
+# Run all tests
+npm run test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific file
+npm run test -- src/features/chat/hooks/__tests__/useChat.test.ts
+
+# Watch mode
+npm run test:watch
+```
+
+## Do NOT
+
+- Skip writing tests for "simple" functions
+- Use snapshot tests for logic (only for UI if at all)
+- Mock too much - prefer testing real behavior
+- Write tests that pass when code is broken

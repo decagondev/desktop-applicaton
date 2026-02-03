@@ -1,0 +1,84 @@
+---
+description: "Enforce feature module structure pattern for Second Brain app"
+globs: ["src/features/**/*"]
+alwaysApply: true
+---
+
+# Feature Module Structure
+
+All features in `src/features/` must follow this standardized structure.
+
+## Required Structure
+
+```
+src/features/{feature-name}/
+├── components/                 # React components
+│   ├── {ComponentName}.tsx
+│   └── __tests__/
+│       └── {ComponentName}.test.tsx
+├── hooks/                      # Custom React hooks
+│   ├── use{HookName}.ts
+│   └── __tests__/
+│       └── use{HookName}.test.ts
+├── context/                    # React context (if stateful)
+│   └── {Feature}Context.tsx
+├── services/                   # Business logic services (if applicable)
+│   ├── {ServiceName}Service.ts
+│   └── __tests__/
+│       └── {ServiceName}Service.test.ts
+├── types/
+│   └── {feature-name}.types.ts
+├── constants/                  # Optional
+│   └── {feature-name}.constants.ts
+└── index.ts                    # Barrel export (REQUIRED)
+```
+
+## Rules
+
+### Naming Conventions
+
+- **Components**: PascalCase (e.g., `ChatWindow.tsx`, `MessageList.tsx`)
+- **Hooks**: camelCase with `use` prefix (e.g., `useChat.ts`, `useVectorStore.ts`)
+- **Services**: PascalCase with `Service` suffix (e.g., `GroqService.ts`)
+- **Types files**: kebab-case with `.types.ts` suffix (e.g., `chat.types.ts`)
+- **Test files**: Same name with `.test.ts(x)` suffix
+
+### Barrel Export (index.ts)
+
+Every feature MUST have an `index.ts` that exports:
+- All public components
+- All public hooks (with type exports)
+- Context provider and hook
+- All public types
+
+```typescript
+// Example: src/features/chat/index.ts
+export { ChatWindow } from './components/ChatWindow';
+export { MessageList } from './components/MessageList';
+
+export { useChat } from './hooks/useChat';
+export type { UseChatOptions, UseChatReturn } from './hooks/useChat';
+
+export { ChatProvider, useChatContext } from './context/ChatContext';
+
+export type {
+  IChatMessage,
+  IChatContext,
+  ISourceReference,
+} from './types/chat.types';
+```
+
+### Test Location
+
+Tests MUST be co-located in `__tests__/` subfolders:
+- `components/__tests__/ComponentName.test.tsx`
+- `hooks/__tests__/useHookName.test.ts`
+- `services/__tests__/ServiceName.test.ts`
+
+### Do NOT
+
+- Create feature files outside `src/features/`
+- Mix components from different features
+- Import internal files from other features (use barrel exports)
+- Skip the `index.ts` barrel export
+- Put tests outside `__tests__/` folders

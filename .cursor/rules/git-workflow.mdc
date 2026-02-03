@@ -1,0 +1,216 @@
+---
+description: "Git workflow and commit conventions for Second Brain app"
+globs: []
+alwaysApply: true
+---
+
+# Git Workflow
+
+Follow this workflow for all development on the Second Brain app.
+
+## Branch Naming
+
+```
+feature/E{epic}-US{story}-{slug}    # New features
+fix/{description}                    # Bug fixes
+chore/{description}                  # Maintenance
+docs/{description}                   # Documentation only
+refactor/{description}               # Code refactoring
+```
+
+### Examples
+
+```
+feature/E1-US1.1-vector-db
+feature/E2-US2.1-document-upload
+feature/E3-US3.1-chat-interface
+fix/memory-leak-in-polling
+chore/update-dependencies
+docs/api-documentation
+refactor/extract-embedding-service
+```
+
+## Commit Message Convention
+
+Use Conventional Commits format:
+
+```
+<type>: <description>
+
+[optional body]
+
+[optional footer]
+```
+
+### Types
+
+| Type | Description |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `style` | Formatting, no code change |
+| `refactor` | Code change that neither fixes nor adds |
+| `test` | Adding or updating tests |
+| `chore` | Maintenance tasks |
+
+### Examples
+
+```
+feat: add vector store with SQLite backup
+
+fix: prevent memory leak in stats polling
+
+docs: update architecture documentation
+
+test: add unit tests for PdfParser
+
+refactor: extract embedding generation to service
+
+chore: update Electron to v40
+```
+
+## Workflow Steps
+
+### 1. Create Feature Branch
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/E1-US1.1-vector-db
+```
+
+### 2. Follow LBI Flow
+
+```
+/lbi.request → /lbi.specify → /lbi.design → /lbi.plan → /lbi.implement
+```
+
+### 3. Develop with Granular Commits
+
+```bash
+# After each logical unit of work
+git add <files>
+git commit -m "feat: implement VectorStore interface"
+
+git add <files>
+git commit -m "feat: add SQLite backup service"
+
+git add <files>
+git commit -m "test: add unit tests for VectorStore"
+```
+
+### 4. Run Quality Checks
+
+```bash
+# All must pass before merge
+npm run lint
+npm run typecheck
+npm run test
+```
+
+### 5. Merge to Main
+
+```bash
+git checkout main
+git merge feature/E1-US1.1-vector-db
+# Or use PR workflow
+```
+
+## Commit Frequency
+
+- Commit after each logical unit of work
+- Commits should be atomic and reversible
+- Don't commit broken code
+- Don't mix unrelated changes in one commit
+
+### Good Commit Boundaries
+
+```
+feat: add IDocumentParser interface
+feat: implement PdfParser
+feat: implement MarkdownParser
+feat: add ParserFactory
+test: add parser unit tests
+```
+
+### Bad Commit Boundaries
+
+```
+feat: add parsers and tests and fix bug and update docs
+WIP
+fix stuff
+updates
+```
+
+## Pre-Commit Checklist
+
+Before each commit:
+
+- [ ] Code compiles without errors
+- [ ] Related tests pass
+- [ ] No linter errors
+- [ ] Code follows project conventions
+- [ ] Commit message follows convention
+
+## Pre-Merge Checklist
+
+Before merging to main:
+
+- [ ] All tests pass: `npm run test`
+- [ ] No linter errors: `npm run lint`
+- [ ] Types check: `npm run typecheck`
+- [ ] Feature complete per spec
+- [ ] Documentation updated if needed
+
+## Branch Lifecycle
+
+```mermaid
+flowchart LR
+    Main[main] --> Feature[feature branch]
+    Feature --> Develop[develop & test]
+    Develop --> Merge[merge to main]
+    Merge --> Main
+    Feature --> Delete[delete branch]
+```
+
+## Protected Branch Rules
+
+- `main` branch:
+  - No direct commits
+  - Requires passing CI
+  - Requires review (self or peer)
+
+## Handling Conflicts
+
+```bash
+# Update feature branch with main
+git checkout feature/my-feature
+git fetch origin
+git rebase origin/main
+# Resolve conflicts if any
+git push --force-with-lease
+```
+
+## Emergency Fixes
+
+For critical production bugs:
+
+```bash
+git checkout main
+git checkout -b fix/critical-bug-description
+# Fix the bug
+git commit -m "fix: critical bug description"
+# Fast-track review and merge
+git checkout main
+git merge fix/critical-bug-description
+```
+
+## Do NOT
+
+- Commit directly to main
+- Force push to main
+- Commit with generic messages ("fix", "update", "WIP")
+- Mix features in one commit
+- Skip running tests before merge
+- Leave branches unmerged for more than a few days

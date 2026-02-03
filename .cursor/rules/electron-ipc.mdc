@@ -1,0 +1,143 @@
+---
+description: "Electron IPC handler and preload patterns for Second Brain app"
+globs: ["electron/**/*", "src/shared/types/electron.d.ts"]
+alwaysApply: true
+---
+
+# Electron IPC Patterns
+
+Follow these patterns for Electron main process and preload communication.
+
+## IPC Channel Naming
+
+Use this convention: `{feature}-{action}[-{detail}]`
+
+```typescript
+// Good
+'vector-add'
+'vector-search'
+'settings-get'
+'settings-secure-store'
+'chat-query'
+'github-clone'
+
+// Bad
+'addVector'          // camelCase
+'VECTOR_ADD'         // SCREAMING_CASE
+'add'                // too generic
+```
+
+## Main Process Handler Pattern
+
+```typescript
+// electron/main.ts or electron/modules/{feature}.ts
+import { ipcMain } from 'electron';
+
+/**
+ * Register IPC handlers for {feature}
+ */
+export function register{Feature}Handlers(): void {
+  /**
+   * Handler description
+   * @param _event - IPC event (unused)
+   * @param param1 - Description
+   * @returns Description of return
+   */
+  ipcMain.handle('{feature}-{action}', async (_event, param1: Type) => {
+    try {
+      // 1. ALWAYS validate input
+      if (!isValid(param1)) {
+        throw new Error('Invalid input');
+      }
+
+      // 2. Process request
+      const result = await processRequest(param1);
+
+      // 3. Return result
+      return result;
+    } catch (error) {
+      console.error('Error in {feature}-{action}:', error);
+      return null; // or { error: error.message }
+    }
+  });
+}
+```
+
+## Preload Script Pattern
+
+```typescript
+// electron/preload.ts
+import { contextBridge, ipcRenderer } from 'electron';
+
+/**
+ * {Feature} API interface
+ */
+interface I{Feature}API {
+  action1: (param: Type) => Promise<ReturnType>;
+  action2: (param: Type) => Promise<ReturnType>;
+}
+
+const {feature}API: I{Feature}API = {
+  action1: (param) => ipcRenderer.invoke('{feature}-action1', param),
+  action2: (param) => ipcRenderer.invoke('{feature}-action2', param),
+};
+
+// Expose to renderer
+contextBridge.exposeInMainWorld('{feature}API', {feature}API);
+```
+
+## Type Declaration Pattern
+
+```typescript
+// src/shared/types/{feature}.d.ts
+interface I{Feature}API {
+  action1: (param: Type) => Promise<ReturnType>;
+  action2: (param: Type) => Promise<ReturnType>;
+}
+
+declare global {
+  interface Window {
+    {feature}API?: I{Feature}API;
+  }
+}
+
+export {};
+```
+
+## Security Rules
+
+1. **NEVER** expose raw `ipcRenderer.send()` or `ipcRenderer.on()`
+2. **ALWAYS** use `ipcRenderer.invoke()` for request/response
+3. **ALWAYS** validate all input in handlers
+4. **NEVER** return raw error objects to renderer
+5. **NEVER** expose file system paths without validation
+
+## Renderer Usage Pattern
+
+```typescript
+// In React hook or component
+const result = await window.{feature}API?.action1(param);
+
+// With null check
+if (!window.{feature}API) {
+  throw new Error('{Feature} API not available');
+}
+```
+
+## Modular Handler Registration
+
+```typescript
+// electron/main.ts
+import { registerVectorHandlers } from './modules/vector-store';
+import { registerSettingsHandlers } from './modules/settings';
+import { registerChatHandlers } from './modules/chat';
+
+app.whenReady().then(() => {
+  // Register all IPC handlers
+  registerVectorHandlers();
+  registerSettingsHandlers();
+  registerChatHandlers();
+
+  createWindow();
+});
+```
