@@ -227,4 +227,3 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
   };
 }
 
-export type { UseChatOptions, UseChatReturn };

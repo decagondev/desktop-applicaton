@@ -277,4 +277,3 @@ export function useVoiceNotes(options: UseVoiceNotesOptions = {}): UseVoiceNotes
   };
 }
 
-export type { UseVoiceNotesOptions, UseVoiceNotesReturn };

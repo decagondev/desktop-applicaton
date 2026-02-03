@@ -308,4 +308,3 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
   };
 }
 
-export type { UseVoiceRecorderReturn };

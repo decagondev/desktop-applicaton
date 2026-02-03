@@ -200,4 +200,3 @@ export function useWebSearch(
   };
 }
 
-export type { UseWebSearchOptions, UseWebSearchReturn };

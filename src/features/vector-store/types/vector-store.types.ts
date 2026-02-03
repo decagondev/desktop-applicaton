@@ -9,6 +9,7 @@
 export type VectorSourceType =
   | 'document'
   | 'web'
+  | 'github'
   | 'github-code'
   | 'github-issue'
   | 'github-pr'
@@ -35,10 +36,14 @@ export interface IVectorMetadata {
   language?: string;
   /** For GitHub: repository URL */
   repoUrl?: string;
+  /** For GitHub: repository name (owner/repo) */
+  repository?: string;
   /** For GitHub: commit hash */
   commitHash?: string;
   /** For GitHub: file path in repo */
   filePath?: string;
+  /** For GitHub: file extension */
+  fileExtension?: string;
   /** For chunked content: chunk index */
   chunkIndex?: number;
   /** For chunked content: total chunks */
@@ -47,6 +52,18 @@ export interface IVectorMetadata {
   wordCount?: number;
   /** Character count */
   charCount?: number;
+  /** For images: width in pixels */
+  width?: number;
+  /** For images: height in pixels */
+  height?: number;
+  /** For images: whether AI description exists */
+  hasDescription?: boolean;
+  /** For images: whether OCR text exists */
+  hasOcr?: boolean;
+  /** For voice: duration in seconds */
+  duration?: number;
+  /** For voice: audio format */
+  format?: string;
 }
 
 /**

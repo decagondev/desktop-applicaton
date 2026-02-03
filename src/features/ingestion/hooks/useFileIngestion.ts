@@ -78,7 +78,9 @@ export function useFileIngestion(
   const [error, setError] = useState<string | null>(null);
   
   const cancelRef = useRef(false);
-  const mergedConfig = { ...DEFAULT_CHUNK_CONFIG, ...chunkConfig };
+  // Merge default chunk config with provided config
+  const _mergedConfig = { ...DEFAULT_CHUNK_CONFIG, ...chunkConfig };
+  void _mergedConfig; // Used for future chunk configuration
 
   /**
    * Update progress state
@@ -303,4 +305,3 @@ export function useFileIngestion(
   };
 }
 
-export type { UseFileIngestionOptions, UseFileIngestionReturn };

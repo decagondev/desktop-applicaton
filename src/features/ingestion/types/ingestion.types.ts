@@ -3,7 +3,7 @@
  * Defines interfaces for document parsing, chunking, and upload
  */
 
-import type { VectorSourceType, IVectorMetadata } from '@features/vector-store';
+import type { IVectorMetadata } from '@features/vector-store';
 
 /**
  * Supported MIME types for document ingestion

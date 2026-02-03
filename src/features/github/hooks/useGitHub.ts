@@ -299,4 +299,3 @@ export function useGitHub(options: UseGitHubOptions = {}): UseGitHubReturn {
   };
 }
 
-export type { UseGitHubOptions, UseGitHubReturn };

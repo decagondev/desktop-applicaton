@@ -71,7 +71,7 @@ export function useNotes(options: UseNotesOptions = {}): UseNotesReturn {
 
   const [notes, setNotes] = useState<INote[]>([]);
   const [selectedNote, setSelectedNote] = useState<INote | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -327,4 +327,3 @@ export function useNotes(options: UseNotesOptions = {}): UseNotesReturn {
   };
 }
 
-export type { UseNotesOptions, UseNotesReturn };

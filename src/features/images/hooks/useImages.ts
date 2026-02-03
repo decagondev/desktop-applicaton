@@ -371,4 +371,3 @@ export function useImages(options: UseImagesOptions = {}): UseImagesReturn {
   };
 }
 
-export type { UseImagesOptions, UseImagesReturn };

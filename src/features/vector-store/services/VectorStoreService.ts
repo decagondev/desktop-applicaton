@@ -190,6 +190,7 @@ export class VectorStoreService implements IVectorStore {
     const entriesByType: Record<VectorSourceType, number> = {
       document: 0,
       web: 0,
+      github: 0,
       'github-code': 0,
       'github-issue': 0,
       'github-pr': 0,

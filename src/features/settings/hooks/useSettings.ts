@@ -257,4 +257,3 @@ export function useSettingsHook(
   };
 }
 
-export type { UseSettingsOptions, UseSettingsReturn };
