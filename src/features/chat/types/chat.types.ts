@@ -143,19 +143,28 @@ export interface IChatContext extends IChatState {
 }
 
 /**
- * LLM model options
+ * AI Provider type (imported from settings for convenience)
  */
-export type LLMModel = 
-  | 'llama-3.3-70b-versatile'
-  | 'llama-3.1-8b-instant'
-  | 'mixtral-8x7b-32768';
+export type AIProvider =
+  | 'groq'
+  | 'openai'
+  | 'anthropic'
+  | 'ollama'
+  | 'together'
+  | 'openrouter'
+  | 'mistral'
+  | 'moonshot'
+  | 'perplexity'
+  | 'deepseek';
 
 /**
  * Chat completion options
  */
 export interface IChatCompletionOptions {
+  /** AI provider to use */
+  provider?: AIProvider;
   /** Model to use */
-  model?: LLMModel;
+  model?: string;
   /** Temperature (0-1) */
   temperature?: number;
   /** Maximum tokens */
@@ -168,8 +177,25 @@ export interface IChatCompletionOptions {
  * Default chat completion options
  */
 export const DEFAULT_CHAT_OPTIONS: Required<IChatCompletionOptions> = {
+  provider: 'groq',
   model: 'llama-3.3-70b-versatile',
   temperature: 0.7,
   maxTokens: 2048,
   systemPrompt: 'You are a helpful assistant.',
+};
+
+/**
+ * Provider API endpoint configuration
+ */
+export const PROVIDER_ENDPOINTS: Record<AIProvider, string> = {
+  groq: 'https://api.groq.com/openai/v1',
+  openai: 'https://api.openai.com/v1',
+  anthropic: 'https://api.anthropic.com/v1',
+  ollama: 'http://localhost:11434/api',
+  together: 'https://api.together.xyz/v1',
+  openrouter: 'https://openrouter.ai/api/v1',
+  mistral: 'https://api.mistral.ai/v1',
+  moonshot: 'https://api.moonshot.cn/v1',
+  perplexity: 'https://api.perplexity.ai',
+  deepseek: 'https://api.deepseek.com/v1',
 };

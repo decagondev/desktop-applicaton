@@ -29,8 +29,10 @@ export type {
 
 // Types
 export type {
+  AIProvider,
   ApiKeyName,
   IApiKeys,
+  IOllamaConfig,
   FeatureFlagName,
   IFeatureFlags,
   ThemeOption,
@@ -45,8 +47,12 @@ export {
   DEFAULT_FEATURE_FLAGS,
   DEFAULT_PREFERENCES,
   DEFAULT_SETTINGS,
+  DEFAULT_OLLAMA_CONFIG,
   API_KEY_LABELS,
   API_KEY_DESCRIPTIONS,
+  AI_PROVIDER_LABELS,
+  AI_PROVIDER_DESCRIPTIONS,
+  PROVIDER_MODELS,
   FEATURE_FLAG_LABELS,
   FEATURE_FLAG_DESCRIPTIONS,
 } from './types/settings.types';

@@ -7,6 +7,7 @@ import type {
   IApiKeys,
   IFeatureFlags,
   IUserPreferences,
+  IOllamaConfig,
   ApiKeyName,
 } from '@features/settings';
 
@@ -16,6 +17,7 @@ import type {
 interface ISettingsStorage {
   features: IFeatureFlags;
   preferences: IUserPreferences;
+  ollama?: IOllamaConfig;
 }
 
 /**
@@ -25,6 +27,7 @@ interface ISettingsReadResult {
   apiKeys: IApiKeys;
   features: IFeatureFlags;
   preferences: IUserPreferences;
+  ollama?: IOllamaConfig;
 }
 
 /**

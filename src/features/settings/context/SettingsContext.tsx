@@ -68,6 +68,7 @@ export function SettingsProvider({
           apiKeys: result.apiKeys ?? {},
           features: { ...DEFAULT_FEATURE_FLAGS, ...result.features },
           preferences: { ...DEFAULT_PREFERENCES, ...result.preferences },
+          ollama: result.ollama ?? DEFAULT_SETTINGS.ollama,
         });
       }
       setIsInitialized(true);

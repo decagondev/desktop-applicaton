@@ -28,11 +28,12 @@ export type {
   IRagQueryResult,
   IChatState,
   IChatContext,
-  LLMModel,
+  AIProvider,
   IChatCompletionOptions,
 } from './types/chat.types';
 
 export {
   DEFAULT_RAG_OPTIONS,
   DEFAULT_CHAT_OPTIONS,
+  PROVIDER_ENDPOINTS,
 } from './types/chat.types';
